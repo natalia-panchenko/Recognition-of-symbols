@@ -1,12 +1,18 @@
 from PIL import Image, ImageDraw
 from os import path
+import copy
 
 
 file_name = input("Введите название файла: ")
 
 
 def image_init():
-    return Image.open(path.join(file_name, file_name + ".png"))
+    print('image_init success')
+    image = Image.open(path.join(file_name, file_name + ".png"))
+    image.save('image.png', "PNG")
+    image = Image.open('image.png')
+
+    return image
 
 
 def image_bin(image):
@@ -20,135 +26,170 @@ def image_bin(image):
             green = pix[i, j][1]
             blue = pix[i, j][2]
             S = red + green + blue
-            if (S <= 383):
+            if S <= 383:
                 red, green, blue = 0, 0, 0
             else:
                 red, green, blue = 255, 255, 255
             draw.point((i, j), (red, green, blue))
 
-    image.save("bin_" + file_name + ".png", "PNG")
+    # image.save("image.png", "PNG")
+    image.save("bin_image.png", "PNG")
     del draw
+    print('image_bin success')
+    return image
+
+
+def resize(image):
+    width = 64
+    height = 64
+    resized_image = image.resize((width, height), Image.ANTIALIAS)
+    resized_image.save("resized_image.png", "PNG")
+    print('resize success')
+    return resized_image
 
 
 def thinning(image):
-    width, height = image.size
+    width = 64
+    height = 64
+    # start_image = Image.open("image.png")
+    start_image = copy.deepcopy(image)
+    # image = Image.open("image.png")
+    draw = ImageDraw.Draw(image)
 
-    bin_image = Image.open("bin_" + file_name + ".png")
-    bin_image1 = Image.open("bin_" + file_name + ".png")
-    draw = ImageDraw.Draw(bin_image1)
-
-    pix3 = bin_image.load()
+    pix = start_image.load()
     flag = False
+
+    print('thinning init')
 
     while flag is False:
         flag = False
 
         for i in range(height):
             for j in range(width):
-                if pix3[i, j][0] == 0:
-                    if pix3[i - 1, j - 1][0] == 0 and pix3[i, j - 1][0] == 0 and pix3[i + 1, j - 1][0] == 0 and \
-                                    pix3[i + 1, j][0] == 0 and pix3[i, j + 1][0] == 255 and \
-                            (pix3[i - 1, j + 1][0] == 255 or pix3[i + 1, j + 1][0] == 255):
+                if pix[i, j][0] == 0:
+                    if pix[i - 1, j - 1][0] == 0 and pix[i, j - 1][0] == 0 and pix[i + 1, j - 1][0] == 0 and \
+                                    pix[i + 1, j][0] == 0 and pix[i, j + 1][0] == 255 and \
+                            (pix[i - 1, j + 1][0] == 255 or pix[i + 1, j + 1][0] == 255):
                         draw.point((i, j), (255, 255, 255))  # template a
                         flag = True
+                        print('template a')
 
-                    if pix3[i - 1, j - 1][0] == 0 and pix3[i, j - 1][0] == 0 and \
-                            (pix3[i + 1, j - 1][0] == 255 or pix3[i + 1, j + 1][0] == 255) and pix3[i + 1, j][0] == 255 \
-                            and pix3[i, j + 1][0] == 0 and pix3[i - 1, j + 1][0] == 0:
+                    if pix[i - 1, j - 1][0] == 0 and pix[i, j - 1][0] == 0 and \
+                            (pix[i + 1, j - 1][0] == 255 or pix[i + 1, j + 1][0] == 255) and pix[i + 1, j][0] == 255 \
+                            and pix[i, j + 1][0] == 0 and pix[i - 1, j + 1][0] == 0:
                         draw.point((i, j), (255, 255, 255))  # template b
                         flag = True
+                        print('template b')
 
-                    if (pix3[i - 1, j - 1][0] == 255 or pix3[i + 1, j - 1][0] == 255) and \
-                                    pix3[i, j - 1][0] == 255 and pix3[i - 1, j][0] == 0 and \
-                                    pix3[i - 1, j + 1][0] == 0 and pix3[i, j + 1][0] == 0 \
-                            and pix3[i + 1, j + 1][0] == 0 and pix3[i, j + 2][0] == 0:
+                    if (pix[i - 1, j - 1][0] == 255 or pix[i + 1, j - 1][0] == 255) and \
+                                    pix[i, j - 1][0] == 255 and pix[i - 1, j][0] == 0 and \
+                                    pix[i - 1, j + 1][0] == 0 and pix[i, j + 1][0] == 0 \
+                            and pix[i + 1, j + 1][0] == 0 and pix[i, j + 2][0] == 0:
                         draw.point((i, j), (255, 255, 255))  # template c
                         flag = True
+                        print('template c')
 
-                    if (pix3[i - 1, j - 1][0] == 255 or pix3[i - 1, j + 1][0] == 255) and \
-                                    pix3[i - 1, j][0] == 255 and pix3[i, j - 1][0] == 0 \
-                            and pix3[i, j + 1][0] == 0 and pix3[i + 1, j - 1][0] == 0 and pix3[i + 1, j][0] == 0 \
-                            and pix3[i + 1, j + 1][0] == 0 and pix3[i + 2, j] == 0:
+                    if (pix[i - 1, j - 1][0] == 255 or pix[i - 1, j + 1][0] == 255) and \
+                                    pix[i - 1, j][0] == 255 and pix[i, j - 1][0] == 0 \
+                            and pix[i, j + 1][0] == 0 and pix[i + 1, j - 1][0] == 0 and pix[i + 1, j][0] == 0 \
+                            and pix[i + 1, j + 1][0] == 0 and pix[i + 2, j] == 0:
                         draw.point((i, j), (255, 255, 255))  # template d
                         flag = True
+                        print('template d')
 
-                    if pix3[i - 1, j][0] == 255 and pix3[i - 1, j + 1][0] == 255 and pix3[i, j - 1][0] == 0 \
-                            and pix3[i, j + 1][0] == 255 and pix3[i + 1, j][0] == 0:
+                    if pix[i - 1, j][0] == 255 and pix[i - 1, j + 1][0] == 255 and pix[i, j - 1][0] == 0 \
+                            and pix[i, j + 1][0] == 255 and pix[i + 1, j][0] == 0:
                         draw.point((i, j), (255, 255, 255))  # template e
                         flag = True
+                        print('template e')
 
-                    if pix3[i - 1, j][0] == 0 and pix3[i - 1, j + 1][0] == 0 and pix3[i, j - 1][0] == 255 \
-                            and pix3[i, j + 1][0] == 0 and pix3[i + 1, j - 1][0] == 255 and pix3[i + 1, j][0] == 255:
+                    if pix[i - 1, j][0] == 0 and pix[i - 1, j + 1][0] == 0 and pix[i, j - 1][0] == 255 \
+                            and pix[i, j + 1][0] == 0 and pix[i + 1, j - 1][0] == 255 and pix[i + 1, j][0] == 255:
                         draw.point((i, j), (255, 255, 255))  # template f
                         flag = True
+                        print('template f')
 
-                    if pix3[i - 1, j - 1][0] == 255 and pix3[i - 1, j][0] == 0 and pix3[i - 1, j + 1][0] == 255 \
-                            and pix3[i, j - 1][0] == 255 and pix3[i, j + 1][0] == 0 and pix3[i + 1, j - 1][0] == 255 and \
-                                    pix3[i + 1, j][0] == 255 and pix3[i + 1, j + 1][0] == 255:
+                    if pix[i - 1, j - 1][0] == 255 and pix[i - 1, j][0] == 0 and pix[i - 1, j + 1][0] == 255 \
+                            and pix[i, j - 1][0] == 255 and pix[i, j + 1][0] == 0 and pix[i + 1, j - 1][0] == 255 and \
+                                    pix[i + 1, j][0] == 255 and pix[i + 1, j + 1][0] == 255:
                         draw.point((i, j), (255, 255, 255))  # template g
                         flag = True
+                        print('template g')
 
-                    if pix3[i - 1, j][0] == 0 and pix3[i, j - 1][0] == 0 \
-                            and pix3[i, j + 1][0] == 255 and pix3[i + 1, j][0] == 255 and pix3[i + 1, j + 1][0] == 255:
+                    if pix[i - 1, j][0] == 0 and pix[i, j - 1][0] == 0 \
+                            and pix[i, j + 1][0] == 255 and pix[i + 1, j][0] == 255 and pix[i + 1, j + 1][0] == 255:
                         draw.point((i, j), (255, 255, 255))  # template h
                         flag = True
+                        print('template h')
 
-                    if pix3[i - 1, j - 1][0] == 255 and pix3[i - 1, j][0] == 255 and pix3[i, j - 1][0] == 255 \
-                            and pix3[i, j + 1][0] == 0 and pix3[i + 1, j][0] == 0 and pix3[i + 1, j + 1][0] == 0:
+                    if pix[i - 1, j - 1][0] == 255 and pix[i - 1, j][0] == 255 and pix[i, j - 1][0] == 255 \
+                            and pix[i, j + 1][0] == 0 and pix[i + 1, j][0] == 0 and pix[i + 1, j + 1][0] == 0:
                         draw.point((i, j), (255, 255, 255))  # template i
                         flag = True
+                        print('template i')
 
-                    if pix3[i - 1, j - 1][0] == 255 and pix3[i - 1, j][0] == 255 and pix3[i - 1, j + 1][0] == 255 and \
-                                    pix3[i, j - 1][0] == 255 \
-                            and pix3[i, j + 1][0] == 0 and pix3[i + 1, j - 1][0] == 255 and pix3[i + 1, j][0] == 0 and \
-                                    pix3[i + 1, j + 1][0] == 255:
+                    if pix[i - 1, j - 1][0] == 255 and pix[i - 1, j][0] == 255 and pix[i - 1, j + 1][0] == 255 and \
+                                    pix[i, j - 1][0] == 255 \
+                            and pix[i, j + 1][0] == 0 and pix[i + 1, j - 1][0] == 255 and pix[i + 1, j][0] == 0 and \
+                                    pix[i + 1, j + 1][0] == 255:
                         draw.point((i, j), (255, 255, 255))  # template j
                         flag = True
+                        print('template j')
 
-                    if pix3[i - 1, j - 1][0] == 255 and pix3[i - 1, j][0] == 255 and pix3[i - 1, j + 1][0] == 255 and \
-                                    pix3[i, j - 1][0] == 255 \
-                            and pix3[i, j + 1][0] == 255 and pix3[i + 1, j - 1][0] == 0 and pix3[i + 1, j][0] == 0 and \
-                                    pix3[i + 1, j + 1][0] == 0:
+                    if pix[i - 1, j - 1][0] == 255 and pix[i - 1, j][0] == 255 and pix[i - 1, j + 1][0] == 255 and \
+                                    pix[i, j - 1][0] == 255 \
+                            and pix[i, j + 1][0] == 255 and pix[i + 1, j - 1][0] == 0 and pix[i + 1, j][0] == 0 and \
+                                    pix[i + 1, j + 1][0] == 0:
                         draw.point((i, j), (255, 255, 255))  # template k
                         flag = True
+                        print('template k')
 
-                    if pix3[i - 1, j - 1][0] == 0 and pix3[i - 1, j][0] == 255 and pix3[i - 1, j + 1][0] == 255 and \
-                                    pix3[i, j - 1][0] == 0 \
-                            and pix3[i, j + 1][0] == 255 and pix3[i + 1, j - 1][0] == 0 and pix3[i + 1, j][0] == 255 and \
-                                    pix3[i + 1, j + 1][0] == 255:
+                    if pix[i - 1, j - 1][0] == 0 and pix[i - 1, j][0] == 255 and pix[i - 1, j + 1][0] == 255 and \
+                                    pix[i, j - 1][0] == 0 \
+                            and pix[i, j + 1][0] == 255 and pix[i + 1, j - 1][0] == 0 and pix[i + 1, j][0] == 255 and \
+                                    pix[i + 1, j + 1][0] == 255:
                         draw.point((i, j), (255, 255, 255))  # template l
                         flag = True
+                        print('template l')
 
-                    if pix3[i - 1, j - 1][0] == 0 and pix3[i - 1, j][0] == 0 and pix3[i - 1, j + 1][0] == 0 and \
-                                    pix3[i, j - 1][0] == 255 \
-                            and pix3[i, j + 1][0] == 255 and pix3[i + 1, j - 1][0] == 255 and pix3[i + 1, j][
-                        0] == 255 and pix3[i + 1, j + 1][0] == 255:
+                    if pix[i - 1, j - 1][0] == 0 and pix[i - 1, j][0] == 0 and pix[i - 1, j + 1][0] == 0 and \
+                                    pix[i, j - 1][0] == 255 \
+                            and pix[i, j + 1][0] == 255 and pix[i + 1, j - 1][0] == 255 and pix[i + 1, j][
+                        0] == 255 and pix[i + 1, j + 1][0] == 255:
                         draw.point((i, j), (255, 255, 255))  # template m
                         flag = True
+                        print('template m')
 
-                    if pix3[i - 1, j - 1][0] == 255 and pix3[i - 1, j][0] == 255 and pix3[i - 1, j + 1][0] == 0 and \
-                                    pix3[i, j - 1][0] == 255 \
-                            and pix3[i, j + 1][0] == 0 and pix3[i + 1, j - 1][0] == 255 and pix3[i + 1, j][0] == 255 and \
-                                    pix3[i + 1, j + 1][0] == 0:
+                    if pix[i - 1, j - 1][0] == 255 and pix[i - 1, j][0] == 255 and pix[i - 1, j + 1][0] == 0 and \
+                                    pix[i, j - 1][0] == 255 \
+                            and pix[i, j + 1][0] == 0 and pix[i + 1, j - 1][0] == 255 and pix[i + 1, j][0] == 255 and \
+                                    pix[i + 1, j + 1][0] == 0:
                         draw.point((i, j), (255, 255, 255))  # template n
                         flag = True
+                        print('template n')
 
-                        # if (pix3[i - 1, j - 1][0] == 255 or pix3[i, j + 1][0] == 255) and pix3[i - 1, j][0] == 0 and pix3[i - 1, j + 1][0] == 0 and \
-                        # 				pix3[i, j - 1][0] == 255 and pix3[i + 1, j - 1][0] == 0 and pix3[i + 1, j][0] == 0 and\
-                        # 				pix3[i + 1, j + 1][0] == 0: # template a2
+                        # if (pix[i - 1, j - 1][0] == 255 or pix[i, j + 1][0] == 255) and pix[i - 1, j][0] == 0 and pix[i - 1, j + 1][0] == 0 and \
+                        # 				pix[i, j - 1][0] == 255 and pix[i + 1, j - 1][0] == 0 and pix[i + 1, j][0] == 0 and\
+                        # 				pix[i + 1, j + 1][0] == 0: # template a2
                         # 	draw.point((i, j), (255, 255, 255))
                         # 	flag = True
 
-                        # if (pix3[i-1, j-1][0] == 255 or pix3[i - 1, j +1][0] == 255) and pix3[i - 1, j][0] == 255 and pix3[i, j - 1][0] == 0\
-                        # 		and pix3[i, j + 1][0] == 0 and pix3[i + 1, j - 1][0] == 0 and pix3[i + 1, j][0] == 0 and pix3[i + 1, j + 1][0] == 0:
+                        # if (pix[i-1, j-1][0] == 255 or pix[i - 1, j +1][0] == 255) and pix[i - 1, j][0] == 255 and pix[i, j - 1][0] == 0\
+                        # 		and pix[i, j + 1][0] == 0 and pix[i + 1, j - 1][0] == 0 and pix[i + 1, j][0] == 0 and pix[i + 1, j + 1][0] == 0:
                         # 	draw.point((i, j), (255,255,255)) #  template b2
                         # 	flag = True
 
-    bin_image1.save("bin_" + file_name + "_1.png", "PNG")
+    print('thinning end of templates')
+    # image.save("image.png", "PNG")
+    image.save("thin_image.png", "PNG")
     del draw
+    print('thinning success')
+    return image
 
 
 image = image_init()
-image_bin(image)
-thinning(image)
+image = resize(image)
+image = image_bin(image)
+image = thinning(image)
+image.save('image.png', 'PNG')
 image.close()
