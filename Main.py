@@ -374,7 +374,7 @@ def thinning_ZS(image):
                         continue
 
                     draw.point((i, j), (255, 255, 255))
-                    #print(i, j)
+                    # print(i, j)
                     flag = True
 
         start_image = copy.deepcopy(image)
@@ -437,9 +437,82 @@ def thinning_ZS(image):
                         continue
 
                     draw.point((i, j), (255, 255, 255))
-                    #print(i, j)
+                    # print(i, j)
                     flag = True
 
+    return image
+
+
+def smth(image):
+    width, height = image.size
+    pix = image.load()
+    key_pixels = []
+
+    for i in range(width):
+        for j in range(height):
+            neigh_counter = 0
+            if pix[i, j][0] == 1:
+                # key_pixels.append({"coordinates": (i, j)})
+                if pix[i - 1, j - 1][0] == 0:
+                    neigh_counter += 1
+                if pix[i, j - 1][0] == 0:
+                    neigh_counter += 1
+                if pix[i + 1, j - 1][0] == 0:
+                    neigh_counter += 1
+                if pix[i - 1, j][0] == 0:
+                    neigh_counter += 1
+                if pix[i + 1, j][0] == 0:
+                    neigh_counter += 1
+                if pix[i - 1, j + 1][0] == 0:
+                    neigh_counter += 1
+                if pix[i, j + 1][0] == 0:
+                    neigh_counter += 1
+                if pix[i + 1, j + 1][0] == 0:
+                    neigh_counter += 1
+                if neigh_counter == 0:
+                    key_pixels.append({"coordinates": (i, j), "type": "type-0"})
+                elif neigh_counter == 1:
+                    key_pixels.append({"coordinates": (i, j), "type": "type-1"})
+                elif neigh_counter == 3:
+                    key_pixels.append({"coordinates": (i, j), "type": "type-3"})
+                elif neigh_counter == 4:
+                    key_pixels.append({"coordinates": (i, j), "type": "type-4"})
+
+    print(key_pixels)
+
+    # length = 0
+    # bends = 0
+    # for k in key_pixels:
+    #     x = key_pixels.keys(k)
+    #     y = key_pixels.keys(k + 1)
+    #
+    #     while True:
+    #         i = x
+    #         j = y
+    #         if pix[i, j - 1][0] == 0:
+    #             length += 1
+    #             x = i
+    #             y = j - 1
+    #
+    #         if pix[i, j + 1][0] == 0:
+    #             length += 1
+    #             x = i
+    #             y = j + 1
+    #
+    #         if pix[i - 1, j][0] == 0:
+    #             length += 1
+    #             x = i - 1
+    #             y = j
+    #
+    #         if pix[i + 1, j][0] == 0:
+    #             length += 1
+    #             x = i + 1
+    #             y = j
+    #
+    #         if pix[i - 1, j - 1][0] == 0 or pix[i - 1, j + 1][0] == 0 or pix[i + 1, j - 1][0] == 0 \
+    #             or pix[i + 1, j + 1][0] == 0:
+    #             length += 1
+    #             bends += 1
     return image
 
 
@@ -449,5 +522,6 @@ image = image_bin(image)
 image = thinning_ZS(image)
 image = thinning(image)
 image = key_pixels_find(image)
+image = smth(image)
 image.save('image.png', 'PNG')
 image.close()
