@@ -445,6 +445,7 @@ def thinning_ZS(image):
 
 def smth(image):
     width, height = image.size
+    draw = ImageDraw.Draw(image)
     pix = image.load()
     key_pixels = []
 
@@ -452,7 +453,6 @@ def smth(image):
         for j in range(height):
             neigh_counter = 0
             if pix[i, j][0] == 1:
-                # key_pixels.append({"coordinates": (i, j)})
                 if pix[i - 1, j - 1][0] == 0:
                     neigh_counter += 1
                 if pix[i, j - 1][0] == 0:
@@ -480,39 +480,72 @@ def smth(image):
 
     print(key_pixels)
 
-    # length = 0
-    # bends = 0
-    # for k in key_pixels:
-    #     x = key_pixels.keys(k)
-    #     y = key_pixels.keys(k + 1)
-    #
-    #     while True:
-    #         i = x
-    #         j = y
-    #         if pix[i, j - 1][0] == 0:
-    #             length += 1
-    #             x = i
-    #             y = j - 1
-    #
-    #         if pix[i, j + 1][0] == 0:
-    #             length += 1
-    #             x = i
-    #             y = j + 1
-    #
-    #         if pix[i - 1, j][0] == 0:
-    #             length += 1
-    #             x = i - 1
-    #             y = j
-    #
-    #         if pix[i + 1, j][0] == 0:
-    #             length += 1
-    #             x = i + 1
-    #             y = j
-    #
-    #         if pix[i - 1, j - 1][0] == 0 or pix[i - 1, j + 1][0] == 0 or pix[i + 1, j - 1][0] == 0 \
-    #             or pix[i + 1, j + 1][0] == 0:
-    #             length += 1
-    #             bends += 1
+    for key_pixel in key_pixels:
+        i, j = key_pixel["coordinates"]
+        length = 0
+        bends = 0
+
+        while True:
+            if pix[i - 1, j - 1][0] == 0:
+                length += 1
+                bends += 1
+                i = i - 1
+                j = j - 1
+                draw.point((i, j), (2, 0, 220))
+                continue
+
+            if pix[i + 1, j - 1][0] == 0:
+                length += 1
+                bends += 1
+                i = i + 1
+                j = j - 1
+                draw.point((i, j), (2, 0, 220))
+                continue
+
+            if pix[i - 1, j + 1][0] == 0:
+                length += 1
+                bends += 1
+                i = i - 1
+                j = j + 1
+                draw.point((i, j), (2, 0, 220))
+                continue
+
+            if pix[i + 1, j + 1][0] == 0:
+                length += 1
+                bends += 1
+                i = i + 1
+                j = j + 1
+                draw.point((i, j), (2, 0, 220))
+                continue
+
+            if pix[i, j - 1][0] == 0:
+                length += 1
+                j = j - 1
+                draw.point((i, j), (2, 0, 220))
+                continue
+
+            if pix[i, j + 1][0] == 0:
+                length += 1
+                j = j + 1
+                draw.point((i, j), (2, 0, 220))
+                continue
+
+            if pix[i - 1, j][0] == 0:
+                length += 1
+                i = i - 1
+                draw.point((i, j), (2, 0, 220))
+                continue
+
+            if pix[i + 1, j][0] == 0:
+                length += 1
+                i = i + 1
+                draw.point((i, j), (2, 0, 220))
+                continue
+
+            else:
+                break
+        print(i, j, length, bends)
+
     return image
 
 
